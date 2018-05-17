@@ -33,6 +33,41 @@ var bulletList  = null;
 var enemyList   = null;
 var scoreLabel  = null;
 
+var toolTipFactory = (function () {
+    var enemyPool = [];  
+	var bulletPool = [];
+    return{
+        createEnemy: function () {
+            if(enemyPool.length == 0){           
+                var enemy = new Enemy(); 
+                return enemy;
+            } else {  
+				var enemy =	enemyPool.shift();
+				enemy.destroy = false;
+                return enemy
+            }
+        },
+
+        recoverEnemy: function (enemy) {              
+            return enemyPool.push(enemy);
+        },
+		
+		createBullet: function () {
+            if(bulletPool.length == 0){           
+                var bullet = new Bullet(); 
+                return bullet;
+            } else {                            
+                var bullet =	bulletPool.shift();
+				bullet.destroy = false;
+                return bullet
+            }
+        },
+
+        recoverBullet: function (bullet) {              
+            return bulletool.push(bullet);
+        }
+    }
+})();
 
 Array.prototype.erase = function(elm) {
     var index = this.indexOf(elm);
@@ -76,14 +111,14 @@ window.onload = function() {
         scene.onenterframe = function() {
             
             if (game.frame%30 < 20 && game.frame % 5 == 0) {
-                var bullet = new Bullet();
+                var bullet = toolTipFactory.createBullet();
                 bullet.moveTo(player.x+PLAYER_WIDTH/2-BULLET_WIDTH/2, player.y-20);
                 bulletList.push(bullet);
                 scene.addChild(bullet);
             }
             
             if (game.frame % ENEMY_CREATE_INTERVAL == 0) {
-                var enemy = new Enemy();
+                var enemy = toolTipFactory.createEnemy();
                 var x = randfloat(0, SCREEN_WIDTH-ENEMY_WIDTH);
                 var y = -20;
                 enemy.moveTo(x, y)
@@ -187,6 +222,7 @@ var Bullet = Class.create(Sprite, {
         if (this.y < -20 || this.destroy === true) {
             this.parentNode.removeChild(this);
             bulletList.erase(this);
+			toolTipFactory.recoverBullet(this);
         }
     },
 });
@@ -207,6 +243,7 @@ var Enemy = Class.create(Sprite, {
         if (this.y > SCREEN_HEIGHT || this.destroy === true) {
             this.parentNode.removeChild(this);
             enemyList.erase(this);
+			toolTipFactory.recoverEnemy(this);
         }
     },
 });
